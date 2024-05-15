@@ -1,10 +1,6 @@
 from flask import Flask # type: ignore
-import flask
-import json
 import csv
-from datetime import datetime
 from flask_cors import CORS
-import re
 
 
 app = Flask(__name__)
@@ -71,6 +67,13 @@ def Sampledata():
                 else:
                     json_event["start"] = dateFormat(date_list[0])
                     json_event["end"] = dateFormat(date_list[-1])
+
+                time_str = r[8].strip("[]")
+                time_list = [time.strip().strip("'") for time in time_str.split("-")]
+
+                json_event["start"] = json_event["start"] + " " + (str (timeCondition(time_list[0])))
+
+
                 if r[11] == 'Family':
                     json_event["color"] = "red"
                 elif r[11] == 'Exhibit':
@@ -79,6 +82,21 @@ def Sampledata():
                     json_event["color"] = "green"
                 json_events.append(json_event)
         return (json_events)
+    
+def timeCondition (time):
+    time = time.strip("'")
+    if (time[0:-2].lower() == "AM"):
+        time = time[0:-2]
+        if len(time) == 4:
+            time = "0" + time
+    else:
+        time = time[0:-2]
+        if len(time) == 4:
+            time = "0" + time
+        time_holder = time[0:2]
+        time_holder = (str ((int (time_holder)) + 12))
+        time = time_holder + time[2:]
+    return time
     
 def dateFormat (date):
     date_str = ""
@@ -164,6 +182,17 @@ def Parserfile():
                     else:
                         json_event["start"] = dateFormat(date_list[0])
                         json_event["end"] = dateFormat(date_list[-1])
+
+                if (r[9] != 'null'):
+                    time_str = r[9].strip("[]")
+                    time_list = [time.strip().strip("'") for time in time_str.split("-")]
+                    #print(time_list)
+                    json_event["start"] = json_event["start"] + " " + (str (timeCondition(time_list[0])))
+                    json_event["end"] = json_event["end"] + " " + (str (timeCondition(time_list[1])))
+                else :
+                    time = r[10]
+
+                
                 if r[12] == 'Family':
                     json_event["color"] = "red"
                 elif r[12] == 'Exhibit':
